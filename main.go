@@ -135,6 +135,7 @@ func rawTelldusEvent(str string) {
 	for _, elm := range data {
 		if len(elm) != 0 {
 			propval := strings.Split(elm, ":")
+			log.Printf("Elm '%s'\n", elm)
 			switch propval[0] {
 			case "class":
 				event.Class = propval[1]
