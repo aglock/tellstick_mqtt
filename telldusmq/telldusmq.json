@@ -1,6 +1,6 @@
 {
     "Mqtt": {
-        "Broker": "tcp://192.168.33.33:1883",
+        "Broker": "tcp://localhost:1883",
         "ClientId": "TelldusMq",
         "Username": "mquser",
         "Password": "mquser",
