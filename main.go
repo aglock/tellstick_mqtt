@@ -120,6 +120,8 @@ func setupTelldus() {
 }
 
 func rawTelldusEvent(str string) {
+	log.Printf("Raw '%s'\n", str)
+	log.Printf("---'\n")
 	data := strings.Split(str, ";")
 	event := &TelldusEvent{
 		Id:       "0",
@@ -135,8 +137,6 @@ func rawTelldusEvent(str string) {
 	for _, elm := range data {
 		if len(elm) != 0 {
 			propval := strings.Split(elm, ":")
-			log.Printf("Raw '%s'\n", elm)
-			log.Printf("----'\n")
 			switch propval[0] {
 			case "class":
 				event.Class = propval[1]
