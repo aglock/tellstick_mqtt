@@ -21,7 +21,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY telldusmq.json /etc/telldusmq/telldusmq.json
 COPY tellstick.conf /etc/tellstick.conf
 
-RUN go get github.com/upsideduck/telldus_mqtt/telldusmq
+RUN go get github.com/upsideduck/tellstick_mqtt/telldusmq
 
 
 ENTRYPOINT ["/bin/bash"]
