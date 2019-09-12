@@ -176,7 +176,7 @@ func rawTelldusEvent(str string) {
 						event.Humidity = propval[1]
 						break
 					}
-				} else {
+				
 					var topicTemplate string
 					var payloadTemplate string
 					if event.Class == "command" {
