@@ -120,11 +120,7 @@ func setupTelldus() {
 }
 
 func rawTelldusEvent(str string) {
-	log.Printf("Raw '%s'\n", str)
-	log.Printf("---'\n")
-
-	command_data = strings.Split(str,"class")
-
+	command_data := strings.Split(str,"class")
 	for _, d := range command_data{
 		if len(d) != 0 {
 			single_command_data := "class"+d
