@@ -121,7 +121,7 @@ func setupTelldus() {
 
 func rawTelldusEvent(str string) {
 	command_data := strings.Split(str,"class")
-	log.Printf("---\n")
+	log.Printf("---\n", single_command_data)
 	for _, d := range command_data{
 		if len(d) != 0 {
 			single_command_data := "class"+d
@@ -176,56 +176,56 @@ func rawTelldusEvent(str string) {
 						event.Humidity = propval[1]
 						break
 					}
-				
-					var topicTemplate string
-					var payloadTemplate string
-					if event.Class == "command" {
-						topicTemplate = viper.GetString("Mqtt.Events.PublishTopic")
-						payloadTemplate = viper.GetString("Mqtt.Events.PublishPayload")
-
-						turnOn := viper.GetString("Tellstick.MapTurnOnTo")
-						turnOff := viper.GetString("Tellstick.MapTurnOffTo")
-
-						if len(turnOn) > 0 && event.Method == "turnon" {
-							event.Method = turnOn
-						}
-
-						if len(turnOff) > 0 && event.Method == "turnoff" {
-							event.Method = turnOff
-						}
-					} else {
-						topicTemplate = viper.GetString("Mqtt.Sensors.PublishTopic")
-						payloadTemplate = viper.GetString("Mqtt.Sensors.PublishPayload")
-						event.Value = event.Temp
-						event.DataType = "temp"
-					}
-
-					var topicString string
-					var payloadString string
-					
-					topicString = parseTemplate(topicTemplate, event)
-					payloadString = parseTemplate(payloadTemplate, event)
-
-					var token MQTT.Token
-
-					log.Printf("Publish to '%s' with '%s'\n", topicString, payloadString)
-					token = mqttClient.Publish(topicString, 0, false, payloadString)
-					token.Wait()
-
-					// Send a duplicate event for humidity
-					if viper.GetBool("Tellstick.SplitTemperatureAndHumidity") && event.Class == "sensor" {
-						event.DataType = "humidity"
-						event.Value = event.Humidity
-						topicString = parseTemplate(topicTemplate, event)
-						payloadString = parseTemplate(payloadTemplate, event)
-
-						log.Printf("Publish to '%s' with '%s'\n", topicString, payloadString)
-						token = mqttClient.Publish(topicString, 0, false, payloadString)
-						token.Wait()
-					}
 				}
 			}
+			var topicTemplate string
+			var payloadTemplate string
+			if event.Class == "command" {
+				topicTemplate = viper.GetString("Mqtt.Events.PublishTopic")
+				payloadTemplate = viper.GetString("Mqtt.Events.PublishPayload")
+
+				turnOn := viper.GetString("Tellstick.MapTurnOnTo")
+				turnOff := viper.GetString("Tellstick.MapTurnOffTo")
+
+				if len(turnOn) > 0 && event.Method == "turnon" {
+					event.Method = turnOn
+				}
+
+				if len(turnOff) > 0 && event.Method == "turnoff" {
+					event.Method = turnOff
+				}
+			} else {
+				topicTemplate = viper.GetString("Mqtt.Sensors.PublishTopic")
+				payloadTemplate = viper.GetString("Mqtt.Sensors.PublishPayload")
+				event.Value = event.Temp
+				event.DataType = "temp"
+			}
+
+			var topicString string
+			var payloadString string
+			
+			topicString = parseTemplate(topicTemplate, event)
+			payloadString = parseTemplate(payloadTemplate, event)
+
+			var token MQTT.Token
+
+			log.Printf("Publish to '%s' with '%s'\n", topicString, payloadString)
+			token = mqttClient.Publish(topicString, 0, false, payloadString)
+			token.Wait()
+
+			// Send a duplicate event for humidity
+			if viper.GetBool("Tellstick.SplitTemperatureAndHumidity") && event.Class == "sensor" {
+				event.DataType = "humidity"
+				event.Value = event.Humidity
+				topicString = parseTemplate(topicTemplate, event)
+				payloadString = parseTemplate(payloadTemplate, event)
+
+				log.Printf("Publish to '%s' with '%s'\n", topicString, payloadString)
+				token = mqttClient.Publish(topicString, 0, false, payloadString)
+				token.Wait()
+			}
 		}
+	
 	}
 }
 
