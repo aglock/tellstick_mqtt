@@ -121,9 +121,11 @@ func setupTelldus() {
 
 func rawTelldusEvent(str string) {
 	command_data := strings.Split(str,"class")
+	log.Printf("---\n")
 	for _, d := range command_data{
 		if len(d) != 0 {
 			single_command_data := "class"+d
+			log.Printf("Command to process %s\n", single_command_data)
 			data := strings.Split(single_command_data, ";")
 			event := &TelldusEvent{
 				Id:       "0",
@@ -200,7 +202,7 @@ func rawTelldusEvent(str string) {
 
 					var topicString string
 					var payloadString string
-
+					
 					topicString = parseTemplate(topicTemplate, event)
 					payloadString = parseTemplate(payloadTemplate, event)
 
