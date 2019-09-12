@@ -24,5 +24,4 @@ COPY tellstick.conf /etc/tellstick.conf
 RUN go get github.com/upsideduck/tellstick_mqtt/telldusmq
 
 
-ENTRYPOINT ["/bin/bash"]
-#ENTRYPOINT ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
+ENTRYPOINT ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
