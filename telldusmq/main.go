@@ -122,102 +122,110 @@ func setupTelldus() {
 func rawTelldusEvent(str string) {
 	log.Printf("Raw '%s'\n", str)
 	log.Printf("---'\n")
-	data := strings.Split(str, ";")
-	event := &TelldusEvent{
-		Id:       "0",
-		House:    "0",
-		Unit:     "0",
-		Code:     "0",
-		Group:    "0",
-		Temp:     "0",
-		Humidity: "0",
-		Method:   "0",
-		Value:    "0",
-		DataType: ""}
-	for _, elm := range data {
-		if len(elm) != 0 {
-			propval := strings.Split(elm, ":")
-			switch propval[0] {
-			case "class":
-				event.Class = propval[1]
-				break
-			case "protocol":
-				event.Protocol = propval[1]
-				break
-			case "model":
-				event.Model = propval[1]
-				break
-			case "code":
-				event.Code = propval[1]
-				break
-			case "house":
-				event.House = propval[1]
-				break
-			case "unit":
-				event.Unit = propval[1]
-				break
-			case "group":
-				event.Group = propval[1]
-				break
-			case "method":
-				event.Method = propval[1]
-				break
-			case "id":
-				event.Id = propval[1]
-				break
-			case "temp":
-				event.Temp = propval[1]
-				break
-			case "humidity":
-				event.Humidity = propval[1]
-				break
-			}
-		} else {
-			var topicTemplate string
-			var payloadTemplate string
-			if event.Class == "command" {
-				topicTemplate = viper.GetString("Mqtt.Events.PublishTopic")
-				payloadTemplate = viper.GetString("Mqtt.Events.PublishPayload")
 
-				turnOn := viper.GetString("Tellstick.MapTurnOnTo")
-				turnOff := viper.GetString("Tellstick.MapTurnOffTo")
+	command_data = strings.Split(str,"class")
 
-				if len(turnOn) > 0 && event.Method == "turnon" {
-					event.Method = turnOn
+	for _, d := range command_data{
+		if len(d) != 0 {
+			single_command_data := "class"+d
+			data := strings.Split(single_command_data, ";")
+			event := &TelldusEvent{
+				Id:       "0",
+				House:    "0",
+				Unit:     "0",
+				Code:     "0",
+				Group:    "0",
+				Temp:     "0",
+				Humidity: "0",
+				Method:   "0",
+				Value:    "0",
+				DataType: ""}
+			for _, elm := range data {
+				if len(elm) != 0 {
+					propval := strings.Split(elm, ":")
+					switch propval[0] {
+					case "class":
+						event.Class = propval[1]
+						break
+					case "protocol":
+						event.Protocol = propval[1]
+						break
+					case "model":
+						event.Model = propval[1]
+						break
+					case "code":
+						event.Code = propval[1]
+						break
+					case "house":
+						event.House = propval[1]
+						break
+					case "unit":
+						event.Unit = propval[1]
+						break
+					case "group":
+						event.Group = propval[1]
+						break
+					case "method":
+						event.Method = propval[1]
+						break
+					case "id":
+						event.Id = propval[1]
+						break
+					case "temp":
+						event.Temp = propval[1]
+						break
+					case "humidity":
+						event.Humidity = propval[1]
+						break
+					}
+				} else {
+					var topicTemplate string
+					var payloadTemplate string
+					if event.Class == "command" {
+						topicTemplate = viper.GetString("Mqtt.Events.PublishTopic")
+						payloadTemplate = viper.GetString("Mqtt.Events.PublishPayload")
+
+						turnOn := viper.GetString("Tellstick.MapTurnOnTo")
+						turnOff := viper.GetString("Tellstick.MapTurnOffTo")
+
+						if len(turnOn) > 0 && event.Method == "turnon" {
+							event.Method = turnOn
+						}
+
+						if len(turnOff) > 0 && event.Method == "turnoff" {
+							event.Method = turnOff
+						}
+					} else {
+						topicTemplate = viper.GetString("Mqtt.Sensors.PublishTopic")
+						payloadTemplate = viper.GetString("Mqtt.Sensors.PublishPayload")
+						event.Value = event.Temp
+						event.DataType = "temp"
+					}
+
+					var topicString string
+					var payloadString string
+
+					topicString = parseTemplate(topicTemplate, event)
+					payloadString = parseTemplate(payloadTemplate, event)
+
+					var token MQTT.Token
+
+					log.Printf("Publish to '%s' with '%s'\n", topicString, payloadString)
+					token = mqttClient.Publish(topicString, 0, false, payloadString)
+					token.Wait()
+
+					// Send a duplicate event for humidity
+					if viper.GetBool("Tellstick.SplitTemperatureAndHumidity") && event.Class == "sensor" {
+						event.DataType = "humidity"
+						event.Value = event.Humidity
+						topicString = parseTemplate(topicTemplate, event)
+						payloadString = parseTemplate(payloadTemplate, event)
+
+						log.Printf("Publish to '%s' with '%s'\n", topicString, payloadString)
+						token = mqttClient.Publish(topicString, 0, false, payloadString)
+						token.Wait()
+					}
 				}
-
-				if len(turnOff) > 0 && event.Method == "turnoff" {
-					event.Method = turnOff
-				}
-			} else {
-				topicTemplate = viper.GetString("Mqtt.Sensors.PublishTopic")
-				payloadTemplate = viper.GetString("Mqtt.Sensors.PublishPayload")
-				event.Value = event.Temp
-				event.DataType = "temp"
-			}
-
-			var topicString string
-			var payloadString string
-
-			topicString = parseTemplate(topicTemplate, event)
-			payloadString = parseTemplate(payloadTemplate, event)
-
-			var token MQTT.Token
-
-			log.Printf("Publish to '%s' with '%s'\n", topicString, payloadString)
-			token = mqttClient.Publish(topicString, 0, false, payloadString)
-			token.Wait()
-
-			// Send a duplicate event for humidity
-			if viper.GetBool("Tellstick.SplitTemperatureAndHumidity") && event.Class == "sensor" {
-				event.DataType = "humidity"
-				event.Value = event.Humidity
-				topicString = parseTemplate(topicTemplate, event)
-				payloadString = parseTemplate(payloadTemplate, event)
-
-				log.Printf("Publish to '%s' with '%s'\n", topicString, payloadString)
-				token = mqttClient.Publish(topicString, 0, false, payloadString)
-				token.Wait()
 			}
 		}
 	}
