@@ -18,8 +18,8 @@ RUN apt-get install -y supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy configuration
-COPY telldusmq.json /etc/telldusmq/telldusmq.json
-COPY tellstick.conf /etc/tellstick.conf
+#COPY telldusmq.json /etc/telldusmq/telldusmq.json
+#COPY tellstick.conf /etc/tellstick.conf
 
 RUN go get github.com/upsideduck/tellstick_mqtt/telldusmq
 
