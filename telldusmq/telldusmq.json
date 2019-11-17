@@ -9,6 +9,7 @@
             "PublishPayload": "{{.Method}}",
             "SubscribeTopic": "tellstick/events",
             "SubscribeDeviceEvents": "tellstick/device/#"
+            "Qos": 1
         },
         "Sensors": {
             "PublishTopic": "tellstick/sensors/{{.Protocol}}/{{.Model}}/{{.Id}}/{{.DataType}}",
