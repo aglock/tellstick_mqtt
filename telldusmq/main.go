@@ -377,7 +377,7 @@ func setupMqtt() {
 
 	topic := viper.GetString("Mqtt.Events.SubscribeTopic")
 	deviceTopic := viper.GetString("Mqtt.Events.SubscribeDeviceEvents")
-	qos := viper.getInt("Mqtt.Events.Qos")
+	qos := viper.GetInt("Mqtt.Events.Qos")
 
 	opts.OnConnect = func(c MQTT.Client) {
 		log.Printf("Subscribing to: %s\n", topic)
